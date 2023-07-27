@@ -1,8 +1,13 @@
 package com.rosspaffett.mattercraft;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -36,7 +41,13 @@ public class ServerEventHandler {
     }
 
     @SubscribeEvent
+    public void onServerStarted(ServerStartedEvent event){
+        sendOutgoingChatMessage("\uD83D\uDCA1\uD83D\uDCA1","Server started.");
+    }
+
+    @SubscribeEvent
     public void onServerStopping(ServerStoppingEvent event) {
+        sendOutgoingChatMessage("\uD83D\uDCA1\uD83D\uDCA1","Server shutting down.");
         stopReceivingMessages();
         stopSendingMessages();
 
@@ -46,6 +57,27 @@ public class ServerEventHandler {
     @SubscribeEvent
     public void onServerTick(TickEvent.ServerTickEvent event) {
         sendIncomingChatMessage();
+    }
+
+    @SubscribeEvent
+    public void onPlayerDeath(LivingDeathEvent event){
+        if (event.getEntity() instanceof Player){
+            LivingEntity player = event.getEntityLiving();
+            sendOutgoingChatMessage(
+                    "\uD83D\uDCA1" + player.getDisplayName().getString(),
+                    "**[ " + player.getBlockX() + " " + player.getBlockZ() + " y" + player.getBlockY() + " ]** \n \uD83D\uDC80 "
+                            + event.getEntityLiving().getCombatTracker().getDeathMessage().getString());
+        }
+    }
+
+    @SubscribeEvent
+    public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event){
+        sendOutgoingChatMessage(" + ",event.getPlayer().getDisplayName().getString());
+    }
+
+    @SubscribeEvent
+    public void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event){
+        sendOutgoingChatMessage(" - ",event.getPlayer().getDisplayName().getString());
     }
 
     private void sendIncomingChatMessage() {
