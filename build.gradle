@@ -6,7 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 
@@ -14,15 +14,15 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.16.4-1.0.0.0-beta2'
+version = '1.18.2-1.0.0.0-beta1'
 group = 'com.rosspaffett.mattercraft'
 archivesBaseName = 'mattercraft'
 
-// For Eclipse tasks
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 minecraft {
-    mappings channel: 'snapshot', version: '20201028-1.16.3'
+    mappings channel: 'official', version: '1.18.2'
 
     runs {
         client {
@@ -57,7 +57,7 @@ minecraft {
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
 
-            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/'), '--existing',
+            args '--mod', 'mattercraft', '--all', '--output', file('src/generated/resources/'), '--existing',
                     file('src/main/resources/')
 
             mods {
@@ -70,7 +70,7 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.4-35.1.32'
+    minecraft 'net.minecraftforge:forge:1.18.2-40.2.0'
     implementation 'com.google.code.gson:gson:2.8.0'
 }
 

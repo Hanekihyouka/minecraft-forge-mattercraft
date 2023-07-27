@@ -3,13 +3,13 @@ package com.rosspaffett.mattercraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.network.FMLNetworkConstants;
-import net.minecraftforge.forgespi.language.IModInfo;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraftforge.network.NetworkConstants;
+
 
 @Mod(MattercraftMod.MOD_ID)
 @Mod.EventBusSubscriber(value = Dist.DEDICATED_SERVER, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -26,19 +26,15 @@ public class MattercraftMod {
      * Tell Forge to ignore any Mattercraft version mismatch between the client and server, since the server
      * implementation is the only one that's used.
      *
-     * This overrides the default display test extension point implemented in
-     * {@link net.minecraftforge.fml.ModContainer#ModContainer(IModInfo)} according to the example provided by
-     * {@link net.minecraftforge.fml.ExtensionPoint#DISPLAYTEST}.
+     * see https://mcforge.readthedocs.io/en/latest/concepts/sides/#writing-one-sided-mods
+     *
      */
     private void allowClientVersionMismatch() {
-        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(
-            () -> FMLNetworkConstants.IGNORESERVERONLY,
-            (remoteVersion, isNetwork) -> true
-        ));
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
     }
 
     @SubscribeEvent
-    public static void onModConfigEvent(ModConfig.ModConfigEvent event) {
+    public static void onModConfigEvent(ModConfigEvent event) {
         if (event.getConfig().getSpec() == MattercraftConfig.SPEC) {
             MattercraftConfig.cacheValuesFromSpec();
         }

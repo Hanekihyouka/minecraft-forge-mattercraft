@@ -1,6 +1,6 @@
 package com.rosspaffett.mattercraft;
 
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.network.chat.TextComponent;
 
 public class ChatMessage {
     private final String text;
@@ -23,7 +23,7 @@ public class ChatMessage {
         return "<" + getUsername() + "> " + getText();
     }
 
-    public StringTextComponent toTextComponent() {
-        return new StringTextComponent(toString());
+    public TextComponent toTextComponent() {
+        return new TextComponent(toString());
     }
 }

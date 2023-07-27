@@ -3,9 +3,9 @@ package com.rosspaffett.mattercraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,7 +25,7 @@ public class ServerEventHandler {
     }
 
     @SubscribeEvent
-    public void onServerStarting(FMLServerStartingEvent event) {
+    public void onServerStarting(ServerStartingEvent event) {
         this.server = event.getServer();
 
         startReceivingMessages();
@@ -36,7 +36,7 @@ public class ServerEventHandler {
     }
 
     @SubscribeEvent
-    public void onServerStopping(FMLServerStoppingEvent event) {
+    public void onServerStopping(ServerStoppingEvent event) {
         stopReceivingMessages();
         stopSendingMessages();
 

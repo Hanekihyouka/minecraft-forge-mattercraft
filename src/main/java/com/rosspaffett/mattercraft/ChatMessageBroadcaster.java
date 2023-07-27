@@ -1,11 +1,11 @@
 package com.rosspaffett.mattercraft;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.text.ChatType;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
 
@@ -24,7 +24,7 @@ public class ChatMessageBroadcaster {
     }
 
     public void broadcast(ChatMessage message) {
-        playerList.func_232641_a_(message.toTextComponent(), CHAT_TYPE, fakePlayer.getUniqueID());
+        playerList.broadcastMessage(message.toTextComponent(), CHAT_TYPE, fakePlayer.getUUID());
     }
 
     private FakePlayer buildFakePlayer() {
@@ -32,7 +32,7 @@ public class ChatMessageBroadcaster {
         return FakePlayerFactory.get(getOverworld(), profile);
     }
 
-    private ServerWorld getOverworld() {
-        return server.getWorld(World.OVERWORLD);
+    private ServerLevel getOverworld() {
+        return server.getLevel(Level.OVERWORLD);
     }
 }
