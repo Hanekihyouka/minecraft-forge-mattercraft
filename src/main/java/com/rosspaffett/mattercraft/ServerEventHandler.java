@@ -26,7 +26,7 @@ public class ServerEventHandler {
 
     @SubscribeEvent
     public void onServerChatEvent(ServerChatEvent event) {
-        sendOutgoingChatMessage(event.getUsername(), event.getMessage());
+        sendOutgoingChatMessage(event.getUsername(), event.getMessage().getString());
     }
 
     @SubscribeEvent
@@ -62,22 +62,22 @@ public class ServerEventHandler {
     @SubscribeEvent
     public void onPlayerDeath(LivingDeathEvent event){
         if (event.getEntity() instanceof Player){
-            LivingEntity player = event.getEntityLiving();
+            LivingEntity player = event.getEntity();
             sendOutgoingChatMessage(
                     "\uD83D\uDCA1" + player.getDisplayName().getString(),
                     "**[ " + player.getBlockX() + " " + player.getBlockZ() + " y" + player.getBlockY() + " ]** \n \uD83D\uDC80 "
-                            + event.getEntityLiving().getCombatTracker().getDeathMessage().getString());
+                            + event.getEntity().getCombatTracker().getDeathMessage().getString());
         }
     }
 
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event){
-        sendOutgoingChatMessage(" + ",event.getPlayer().getDisplayName().getString());
+        sendOutgoingChatMessage(" + ",event.getEntity().getDisplayName().getString());
     }
 
     @SubscribeEvent
     public void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event){
-        sendOutgoingChatMessage(" - ",event.getPlayer().getDisplayName().getString());
+        sendOutgoingChatMessage(" - ",event.getEntity().getDisplayName().getString());
     }
 
     private void sendIncomingChatMessage() {

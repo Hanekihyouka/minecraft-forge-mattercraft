@@ -1,17 +1,21 @@
 package com.rosspaffett.mattercraft;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.chat.ChatMessageContent;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
+import java.util.UUID;
 
 public class ChatMessageBroadcaster {
-    private static final ChatType CHAT_TYPE = ChatType.CHAT;
     private static final String FAKE_PLAYER_NAME = "Mattercraft";
+    private static final UUID FAKE_PLAYER_UUID = UUIDUtil.createOfflinePlayerUUID(FAKE_PLAYER_NAME);
 
     private final FakePlayer fakePlayer;
     private final PlayerList playerList;
@@ -24,11 +28,16 @@ public class ChatMessageBroadcaster {
     }
 
     public void broadcast(ChatMessage message) {
-        playerList.broadcastMessage(message.toTextComponent(), CHAT_TYPE, fakePlayer.getUUID());
+        System.out.println("not sure wut im doing");
+        System.out.println(message.toString());
+        playerList.broadcastChatMessage(PlayerChatMessage.system(
+                new ChatMessageContent(message.toString())),
+                fakePlayer.createCommandSourceStack(),
+                ChatType.bind(ChatType.CHAT,fakePlayer));
     }
 
     private FakePlayer buildFakePlayer() {
-        GameProfile profile = new GameProfile(null, FAKE_PLAYER_NAME);
+        GameProfile profile = new GameProfile(FAKE_PLAYER_UUID, FAKE_PLAYER_NAME);
         return FakePlayerFactory.get(getOverworld(), profile);
     }
 
