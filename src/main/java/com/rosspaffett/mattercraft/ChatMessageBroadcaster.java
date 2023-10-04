@@ -28,8 +28,6 @@ public class ChatMessageBroadcaster {
     }
 
     public void broadcast(ChatMessage message) {
-        System.out.println("not sure wut im doing");
-        System.out.println(message.toString());
         playerList.broadcastChatMessage(PlayerChatMessage.system(
                 new ChatMessageContent(message.toString())),
                 fakePlayer.createCommandSourceStack(),
