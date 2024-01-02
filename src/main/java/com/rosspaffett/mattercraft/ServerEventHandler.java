@@ -1,57 +1,27 @@
 package com.rosspaffett.mattercraft;
 
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+
+import com.rosspaffett.mattercraft.config.ConfigHandler;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.ServerChatEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+
+import static com.rosspaffett.mattercraft.MattercraftMod.SERVER;
 
 public class ServerEventHandler {
     private static final String INCOMING_MESSAGE_THREAD_NAME = "Mattercraft/IncomingMessageThread";
-    private static final Logger LOGGER = LogManager.getLogger();
     private static final String OUTGOING_MESSAGE_THREAD_NAME = "Mattercraft/OutgoingMessageThread";
 
     private ChatMessageBroadcaster incomingMessageBroadcaster;
     private ChatMessageReceiver incomingMessageReceiver;
     private ChatMessageSender outgoingMessageSender;
-    private MinecraftServer server;
 
     @SubscribeEvent
     public void onServerChatEvent(ServerChatEvent event) {
         sendOutgoingChatMessage(event.getUsername(), event.getMessage());
-    }
-
-    @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
-        this.server = event.getServer();
-
-        startReceivingMessages();
-        startSendingMessages();
-
-        LOGGER.info("Mattercraft is relaying chat to Matterbridge gateway \"{}\" at {}",
-            MattercraftConfig.gateway, MattercraftConfig.baseUrl);
-    }
-
-    @SubscribeEvent
-    public void onServerStarted(ServerStartedEvent event){
-        sendOutgoingChatMessage("\uD83D\uDCA1\uD83D\uDCA1","Server started.");
-    }
-
-    @SubscribeEvent
-    public void onServerStopping(ServerStoppingEvent event) {
-        sendOutgoingChatMessage("\uD83D\uDCA1\uD83D\uDCA1","Server shutting down.");
-        stopReceivingMessages();
-        stopSendingMessages();
-
-        this.server = null;
     }
 
     @SubscribeEvent
@@ -61,23 +31,23 @@ public class ServerEventHandler {
 
     @SubscribeEvent
     public void onPlayerDeath(LivingDeathEvent event){
-        if (event.getEntity() instanceof Player){
-            LivingEntity player = event.getEntityLiving();
+        if (event.getEntity() instanceof EntityPlayer){
+            EntityPlayer player = (EntityPlayer) event.getEntityLiving();
             sendOutgoingChatMessage(
-                    "\uD83D\uDCA1" + player.getDisplayName().getString(),
-                    "**[ " + player.getBlockX() + " " + player.getBlockZ() + " y" + player.getBlockY() + " ]** \n \uD83D\uDC80 "
-                            + event.getEntityLiving().getCombatTracker().getDeathMessage().getString());
+                    "\uD83D\uDCA1 " + player.getName(),
+                    "**[ " + ((int) player.posX) + " " + ((int) player.posZ) + " y" + ((int) player.posY) + " ]** \n \uD83D\uDC80 "
+                            + event.getEntityLiving().getCombatTracker().getDeathMessage().getUnformattedText());
         }
     }
 
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event){
-        sendOutgoingChatMessage(" + ",event.getPlayer().getDisplayName().getString());
+        sendOutgoingChatMessage(" + ",event.player.getName());
     }
 
     @SubscribeEvent
     public void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event){
-        sendOutgoingChatMessage(" - ",event.getPlayer().getDisplayName().getString());
+        sendOutgoingChatMessage(" - ",event.player.getName());
     }
 
     private void sendIncomingChatMessage() {
@@ -86,7 +56,7 @@ public class ServerEventHandler {
         incomingMessageBroadcaster.broadcast(message);
     }
 
-    private void sendOutgoingChatMessage(String username, String body) {
+    void sendOutgoingChatMessage(String username, String body) {
         ChatMessage message = new ChatMessage(username, body);
         this.outgoingMessageSender.enqueue(message);
     }
@@ -101,26 +71,24 @@ public class ServerEventHandler {
         outgoingMessageThread.start();
     }
 
-    private void startReceivingMessages() {
-        this.incomingMessageBroadcaster = new ChatMessageBroadcaster(server);
-        this.incomingMessageReceiver = new ChatMessageReceiver(MattercraftConfig.baseUrl, MattercraftConfig.gateway,
-            MattercraftConfig.apiToken);
+    void startReceivingMessages() {
+        this.incomingMessageBroadcaster = new ChatMessageBroadcaster(SERVER);
+        this.incomingMessageReceiver = new ChatMessageReceiver(ConfigHandler.mattercraftConfig.base_url, ConfigHandler.mattercraftConfig.gateway, ConfigHandler.mattercraftConfig.api_token);
 
         startIncomingMessageThread();
     }
 
-    private void startSendingMessages() {
-        this.outgoingMessageSender = new ChatMessageSender(MattercraftConfig.baseUrl, MattercraftConfig.gateway,
-            MattercraftConfig.apiToken);
+    void startSendingMessages() {
+        this.outgoingMessageSender = new ChatMessageSender(ConfigHandler.mattercraftConfig.base_url, ConfigHandler.mattercraftConfig.gateway, ConfigHandler.mattercraftConfig.api_token);
 
         startOutgoingMessageThread();
     }
 
-    private void stopReceivingMessages() {
+    void stopReceivingMessages() {
         this.incomingMessageReceiver.stop();
     }
 
-    private void stopSendingMessages() {
+    void stopSendingMessages() {
         this.outgoingMessageSender.stop();
     }
 }

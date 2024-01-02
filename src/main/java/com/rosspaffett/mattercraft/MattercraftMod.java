@@ -1,51 +1,57 @@
 package com.rosspaffett.mattercraft;
 
-import net.minecraftforge.api.distmarker.Dist;
+import com.rosspaffett.mattercraft.config.ConfigHandler;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.network.NetworkConstants;
+import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
-@Mod(MattercraftMod.MOD_ID)
-@Mod.EventBusSubscriber(value = Dist.DEDICATED_SERVER, bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod(modid = MattercraftMod.MODID, name = MattercraftMod.NAME, version = MattercraftMod.VERSION,
+        serverSideOnly = true, acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.12.2]")
 public class MattercraftMod {
-    public static final String MOD_ID = "mattercraft";
+    public static final String MODID = "mattercraft";
+    public static final String NAME = "MatterCraft";
+    public static final String VERSION = "1.0";
+    private static final Logger LOGGER = LogManager.getLogger();
+    public static MinecraftServer SERVER = null;
+
+    private ServerEventHandler serverEventHandler;
 
     public MattercraftMod() {
-        allowClientVersionMismatch();
-        registerConfig();
         registerServerEventHandler();
     }
 
-    /**
-     * Tell Forge to ignore any Mattercraft version mismatch between the client and server, since the server
-     * implementation is the only one that's used.
-     *
-     * see https://mcforge.readthedocs.io/en/latest/concepts/sides/#writing-one-sided-mods
-     *
-     */
-    private void allowClientVersionMismatch() {
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
-    }
-
-    @SubscribeEvent
-    public static void onModConfigEvent(ModConfigEvent event) {
-        if (event.getConfig().getSpec() == MattercraftConfig.SPEC) {
-            MattercraftConfig.cacheValuesFromSpec();
-        }
-    }
-
-    private void registerConfig() {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, MattercraftConfig.SPEC);
-    }
-
     private void registerServerEventHandler() {
-        ServerEventHandler serverEventHandler = new ServerEventHandler();
+        serverEventHandler = new ServerEventHandler();
         MinecraftForge.EVENT_BUS.register(serverEventHandler);
     }
+
+    @Mod.EventHandler
+    public void onServerAboutToStart(FMLServerAboutToStartEvent event) {
+        SERVER = event.getServer();
+        serverEventHandler.startReceivingMessages();
+        serverEventHandler.startSendingMessages();
+        LOGGER.info("Mattercraft is relaying chat to Matterbridge gateway \"{}\" at {}",
+                ConfigHandler.mattercraftConfig.gateway, ConfigHandler.mattercraftConfig.base_url);
+    }
+
+    @Mod.EventHandler
+    public void onServerStarted(FMLServerStartedEvent event){
+        serverEventHandler.sendOutgoingChatMessage("\uD83D\uDCA1\uD83D\uDCA1","Server started.");
+    }
+
+    @Mod.EventHandler
+    public void onServerStopping(FMLServerStoppingEvent event) {
+        serverEventHandler.sendOutgoingChatMessage("\uD83D\uDCA1\uD83D\uDCA1","Server shutting down.");
+        serverEventHandler.stopReceivingMessages();
+        serverEventHandler.stopSendingMessages();
+
+        SERVER = null;
+    }
+
 }
