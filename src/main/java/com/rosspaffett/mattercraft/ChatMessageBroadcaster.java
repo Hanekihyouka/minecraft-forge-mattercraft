@@ -2,7 +2,6 @@ package com.rosspaffett.mattercraft;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.chat.ChatMessageContent;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.MinecraftServer;
@@ -29,7 +28,7 @@ public class ChatMessageBroadcaster {
 
     public void broadcast(ChatMessage message) {
         playerList.broadcastChatMessage(PlayerChatMessage.system(
-                new ChatMessageContent(message.toString())),
+                message.getText()),
                 fakePlayer.createCommandSourceStack(),
                 ChatType.bind(ChatType.CHAT,fakePlayer));
     }
