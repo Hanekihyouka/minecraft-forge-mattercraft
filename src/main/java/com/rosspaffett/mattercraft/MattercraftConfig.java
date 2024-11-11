@@ -1,14 +1,14 @@
 package com.rosspaffett.mattercraft;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class MattercraftConfig {
     public static final MatterbridgeConfig MATTERBRIDGE;
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
     static {
-        final Pair<MatterbridgeConfig, ForgeConfigSpec> configSpecPair = new ForgeConfigSpec.Builder().
+        final Pair<MatterbridgeConfig, ModConfigSpec> configSpecPair = new ModConfigSpec.Builder().
             configure(MatterbridgeConfig::new);
         MATTERBRIDGE = configSpecPair.getLeft();
         SPEC = configSpecPair.getRight();
@@ -18,11 +18,6 @@ public class MattercraftConfig {
     public static String baseUrl;
     public static String gateway;
 
-    /**
-     * Cache the {@link net.minecraftforge.common.ForgeConfigSpec.ConfigValue}s from {@link MatterbridgeConfig} into
-     * static class members using plain Java primitives, so that we don't need to repeatedly call
-     * {@link ForgeConfigSpec.ConfigValue#get()}, which is relatively expensive.
-     */
     protected static void cacheValuesFromSpec() {
         apiToken = MATTERBRIDGE.apiToken.get();
         baseUrl = MATTERBRIDGE.baseUrl.get();
@@ -30,11 +25,11 @@ public class MattercraftConfig {
     }
 
     public static class MatterbridgeConfig {
-        public final ForgeConfigSpec.ConfigValue<String> apiToken;
-        public final ForgeConfigSpec.ConfigValue<String> baseUrl;
-        public final ForgeConfigSpec.ConfigValue<String> gateway;
+        public final ModConfigSpec.ConfigValue<String> apiToken;
+        public final ModConfigSpec.ConfigValue<String> baseUrl;
+        public final ModConfigSpec.ConfigValue<String> gateway;
 
-        public MatterbridgeConfig(ForgeConfigSpec.Builder builder) {
+        public MatterbridgeConfig(ModConfigSpec.Builder builder) {
             builder.push("matterbridge");
 
             apiToken = builder
