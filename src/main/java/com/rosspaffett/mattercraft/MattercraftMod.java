@@ -22,7 +22,7 @@ public class MattercraftMod {
     }
 
     @SubscribeEvent
-    public static void onModConfigEvent(ModConfigEvent event) {
+    public static void onModConfigEvent(ModConfigEvent.Loading event) {
         if (event.getConfig().getSpec() == MattercraftConfig.SPEC) {
             MattercraftConfig.cacheValuesFromSpec();
         }
